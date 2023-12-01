@@ -1,12 +1,15 @@
+from rest_framework.exceptions import AuthenticationFailed, ParseError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions, status
 from .serializers import UserCreateSerializer, UserSerializer
+from .models import CustomUser
 from django.middleware import csrf
+from rest_framework.decorators import api_view
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.conf import settings
-from rest_framework_simplejwt.authentication import JWTAuthentication
+# from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 def get_tokens_for_user(user):
@@ -41,30 +44,60 @@ class RetrieveUserView(APIView):
 
 
 class LoginView(APIView):
-    def post(self, request, format=None):
-        data = request.data
-        print(data)
-        response = Response()
-        username = data.get('username', None)
-        password = data.get('password', None)
-        print(username, password)
-        user = authenticate(username=username, password=password)
+    def post(self, request):
+        print("yoooo \n\n\n\n\n")
+        try:
+            email = request.data['email']
+            password = request.data['password']
 
-        if user is not None:
-            if user.is_active:
-                data = get_tokens_for_user(user)
-                response.set_cookie(
-                    key=settings.SIMPLE_JWT['AUTH_COOKIE'],
-                    value=data["access"],
-                    expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
-                    secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
-                    httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-                    samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
-                )
-                csrf.get_token(request)
-                response.data = {"Success": "Login successfully", "data": data}
-                return response
-            else:
-                return Response({"No active": "This account is not active!!"}, status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response({"Invalid": "Invalid username or password!!"}, status=status.HTTP_404_NOT_FOUND)
+        except KeyError:
+            raise ParseError('All Fields Are Required')
+
+        if not CustomUser.objects.filter(email=email).exists():
+            raise AuthenticationFailed('Invalid Email Address')
+
+        if not CustomUser.objects.filter(email=email, is_active=True).exists():
+            raise AuthenticationFailed(
+                'You are blocked by admin ! Please contact admin')
+
+        user = authenticate(username=email, password=password)
+        if user is None:
+            raise AuthenticationFailed('Invalid Password')
+
+        refresh = RefreshToken.for_user(user)
+        refresh["first_name"] = str(user.first_name)
+
+        content = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+            'isAdmin': user.is_superuser,
+        }
+
+        return Response(content, status=status.HTTP_200_OK)
+
+
+class hello_world(APIView):
+    def post(self, request):
+        return Response({'message': 'Woo super achive ment yooo!'})
+
+
+class HomeView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        content = {
+            'message': 'Welcome to the JWT Authentication page using React Js and Django!'}
+        return Response(content)
+
+
+class LogoutView(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh_token"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)

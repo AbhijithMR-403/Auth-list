@@ -1,8 +1,41 @@
-import React from 'react'
+import React, {useState} from 'react'
+import { useNavigate} from 'react-router-dom'
+import axios from 'axios'
 import FormField from '../components/auth/FormField'
+import { baseURL } from '../constant/constant'
 import "./../style/auth-page/auth.css"
 
 function SignUpPage() {
+    const [formError, setFormError] = useState([])
+  const navigate = useNavigate();
+
+ const handleRegisterSubmit = async (event)=>{
+    event.preventDefault();
+    setFormError([])
+    const formData = new FormData();
+    formData.append("first_name", event.target.first_name.value);
+    formData.append("email", event.target.email.value);
+    formData.append("password", event.target.password.value);
+    formData.append("last_name", "event.target.password.value");
+    try {
+        const res = await axios.post(baseURL+'/register', formData)
+        console.log("auhsdfjklds",res);
+        if(res.status === 201){
+        navigate('/login',
+        {
+            state:res.data.Message
+        })
+        return res
+        }  
+    }
+    catch (error) {
+        console.log(error.response.data)
+        setFormError(error.response.data)
+        
+        console.log(error);
+        
+    }
+    }
   return (
     <div>
         <section className="vh-90 gradient-custom">
@@ -16,14 +49,14 @@ function SignUpPage() {
         
                     <h2 className="fw-bold mb-2 text-uppercase">Sign Up</h2>
                     <p className="text-white-50 mb-5">Please enter your details!</p>
-                    
-                    <FormField id="typeNameX" type="text" value="Name"/>
-                    <FormField id="typeEmailX" type="email" value="Email"/>
-                    <FormField id="typePasswordX" type="password" value="Password"/>
-                    <FormField id="typeConfirmPasswordX" type="password" value="Confirm Password"/>
+                    <form onSubmit={handleRegisterSubmit} method='POST'>
+                    <FormField id="typeNameX" type="text" value="Name" name="first_name"/>
+                    <FormField id="typeEmailX" type="email" value="Email" name="email" />
+                    <FormField id="typePasswordX" type="password" value="Password" name="password"/>
+                    <FormField id="typeConfirmPasswordX" type="password" value="Confirm Password"name="confirm_password" />
         
                     <button className="btn btn-outline-light btn-lg px-5" type="submit">Sign Up</button>
-        
+                    </form>
                     <div className="d-flex justify-content-center text-center mt-4 pt-1">
                         <a href="#!" className="text-white"><i className="fab fa-facebook-f fa-lg"></i></a>
                         <a href="#!" className="text-white"><i className="fab fa-twitter fa-lg mx-4 px-2"></i></a>
@@ -31,7 +64,13 @@ function SignUpPage() {
                     </div>
         
                     </div>
-        
+                    {/* <ul className='text-danger'>
+              {Object.keys(formError).map((key) => (
+                formError[key].map((message, index) => (
+                  <li key={`${key}_${index}`}>{message}</li>
+                ))
+              ))}
+            </ul> */}
                     <div>
                     <p className="mb-0">Already have an account? <a href="#!" className="text-white-50 fw-bold">Login</a>
                     </p>
