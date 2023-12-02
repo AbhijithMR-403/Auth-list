@@ -3,9 +3,9 @@ import FormField from '../components/auth/FormField'
 import "./../style/auth-page/auth.css"
 import { Link ,useLocation,useNavigate} from 'react-router-dom'
 import axios from 'axios'
-// import { useDispatch } from 'react-redux';
-// import { set_Authentication } from '../redux/authentication/authenticationSlice'
-// import jwt_decode from "jwt-decode";
+import { useDispatch } from 'react-redux';
+import { set_Authentication } from '../redux/authentication/authenticationSlice'
+import { jwtDecode } from 'jwt-decode'
 
 function LoginPage() {
 const { state } = useLocation();
@@ -14,7 +14,7 @@ const { state } = useLocation();
   const baseURL='http://127.0.0.1:8000'
 
   const navigate = useNavigate();
-//   const dispatch = useDispatch();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if(state){
@@ -36,13 +36,13 @@ const { state } = useLocation();
         localStorage.setItem('access', res.data.access)
         localStorage.setItem('refresh', res.data.refresh)
         console.log(res.data);
-        // dispatch(
-        //   set_Authentication({
-        //     name: jwt_decode(res.data.access).first_name,
-        //     isAuthenticated: true,
-        //     isAdmin:res.data.isAdmin
-        //   })
-        // );
+        dispatch(
+          set_Authentication({
+            name: jwtDecode(res.data.access).first_name,
+            isAuthenticated: true,
+            isAdmin:res.data.isAdmin
+          })
+        );
         navigate('/')
         return res
       }  
@@ -51,11 +51,13 @@ const { state } = useLocation();
       console.log(error);
       if (error.response.status===401)
       {
+        setmessage(error.response.data)
         setFormError(error.response.data)
+        console.log(error.response.data);
       }
       else
       {
-        console.log(error);
+        console.log(error.response.data);
   
       }
     }
@@ -80,6 +82,11 @@ const { state } = useLocation();
                 <FormField id="typePasswordX" type="password" value="Password" name="password" />
                 
     
+                  <a className='text-danger text-decoration-none'>
+                    {
+                      formError.detail
+                    }
+                    </a>
                 <p className="small mb-5 pb-lg-2"><a className="text-white-50" href="#!">Forgot password?</a></p>
     
                 <button className="btn btn-outline-light btn-lg px-5" type="submit">Login</button>
@@ -94,7 +101,7 @@ const { state } = useLocation();
                 </div>
     
                 <div>
-                <p className="mb-0">Don't have an account? <a href="#!" className="text-white-50 fw-bold">Sign Up</a>
+                <p className="mb-0">Don't have an account? <a href="#!" className="text-white-50 fw-bold"> <Link to={'/signup'}>Sign Up</Link> </a>
                 </p>
                 </div>
     

@@ -1,5 +1,5 @@
 import React, {useState} from 'react'
-import { useNavigate} from 'react-router-dom'
+import { Link, useNavigate} from 'react-router-dom'
 import axios from 'axios'
 import FormField from '../components/auth/FormField'
 import { baseURL } from '../constant/constant'
@@ -12,11 +12,13 @@ function SignUpPage() {
  const handleRegisterSubmit = async (event)=>{
     event.preventDefault();
     setFormError([])
+    if (event.target.password.value !== event.target.confirm_password.value)
+    return setFormError(['Password and Confirm Password must be same'])
     const formData = new FormData();
     formData.append("first_name", event.target.first_name.value);
     formData.append("email", event.target.email.value);
     formData.append("password", event.target.password.value);
-    formData.append("last_name", "event.target.password.value");
+    formData.append("last_name", event.target.last_name.value);
     try {
         const res = await axios.post(baseURL+'/register', formData)
         console.log("auhsdfjklds",res);
@@ -50,10 +52,11 @@ function SignUpPage() {
                     <h2 className="fw-bold mb-2 text-uppercase">Sign Up</h2>
                     <p className="text-white-50 mb-5">Please enter your details!</p>
                     <form onSubmit={handleRegisterSubmit} method='POST'>
-                    <FormField id="typeNameX" type="text" value="Name" name="first_name"/>
+                    <FormField id="typeFNameX" type="text" value="First Name" name="first_name"/>
+                    <FormField id="typeLNameX" type="text" value="Last Name" name="last_name"/>
                     <FormField id="typeEmailX" type="email" value="Email" name="email" />
                     <FormField id="typePasswordX" type="password" value="Password" name="password"/>
-                    <FormField id="typeConfirmPasswordX" type="password" value="Confirm Password"name="confirm_password" />
+                    <FormField id="typeConfirmPasswordX" type="password" value="Confirm Password" name="confirm_password" />
         
                     <button className="btn btn-outline-light btn-lg px-5" type="submit">Sign Up</button>
                     </form>
@@ -64,15 +67,19 @@ function SignUpPage() {
                     </div>
         
                     </div>
-                    {/* <ul className='text-danger'>
-              {Object.keys(formError).map((key) => (
-                formError[key].map((message, index) => (
-                  <li key={`${key}_${index}`}>{message}</li>
-                ))
-              ))}
-            </ul> */}
+                    <ul className='text-danger'>
+              {formError.map((key,index) => {
+                console.log("wha is thsis\n\n\n\n",formError);
+                console.log(key)
+                return <li key={{index}}>{key}</li>
+                // (
+                // formError[key].map((message, index) => (
+                //   <li key={`${key}_${index}`}>{message}</li>
+                // )))
+              })}
+            </ul>
                     <div>
-                    <p className="mb-0">Already have an account? <a href="#!" className="text-white-50 fw-bold">Login</a>
+                    <p className="mb-0">Already have an account? <a href="#!" className="text-white-50 fw-bold"> <Link to={'/login'}>Login</Link></a>
                     </p>
                     </div>
         

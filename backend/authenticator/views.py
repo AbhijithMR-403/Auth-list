@@ -45,7 +45,6 @@ class RetrieveUserView(APIView):
 
 class LoginView(APIView):
     def post(self, request):
-        print("yoooo \n\n\n\n\n")
         try:
             email = request.data['email']
             password = request.data['password']
@@ -66,7 +65,7 @@ class LoginView(APIView):
 
         refresh = RefreshToken.for_user(user)
         refresh["first_name"] = str(user.first_name)
-
+        print(str(refresh), "\n\n\n", str(refresh.access_token))
         content = {
             'refresh': str(refresh),
             'access': str(refresh.access_token),
