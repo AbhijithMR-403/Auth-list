@@ -39,6 +39,7 @@ const { state } = useLocation();
         dispatch(
           set_Authentication({
             name: jwtDecode(res.data.access).first_name,
+            email: event.target.email.value,
             isAuthenticated: true,
             isAdmin:res.data.isAdmin
           })
@@ -62,6 +63,8 @@ const { state } = useLocation();
       }
     }
   }
+
+  
 
   return (
     <div>

@@ -8,6 +8,7 @@ import store from './redux/store';
 import AdminLogin from './container/admin/AdminLogin';
 import ProtectedRoute from './container/admin/ProtectedRoute';
 import AdminHome from './container/admin/AdminHome';
+import ProtectedRouteAdmin from './container/admin/ProtectedRouteAdmin';
 
 function App() {
   return (
@@ -23,7 +24,9 @@ function App() {
           <Route path='/adminlogin' element={<AdminLogin />}/>
           <Route path='/signup' element={<SignUpPage />}/>
           <Route path='/login' element={<LoginPage />}/>
+          <Route element={< ProtectedRouteAdmin />} >
           <Route path='/adminpage' element={<AdminHome />}/>
+          </Route>
         </Routes>
       </Provider>
       </Router>

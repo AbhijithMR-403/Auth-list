@@ -6,7 +6,7 @@ import { baseURL } from '../constant/constant'
 import "./../style/auth-page/auth.css"
 
 function SignUpPage() {
-    const [formError, setFormError] = useState([])
+    const [formError, setFormError] = useState([""])
   const navigate = useNavigate();
 
  const handleRegisterSubmit = async (event)=>{
@@ -21,7 +21,6 @@ function SignUpPage() {
     formData.append("last_name", event.target.last_name.value);
     try {
         const res = await axios.post(baseURL+'/register', formData)
-        console.log("auhsdfjklds",res);
         if(res.status === 201){
         navigate('/login',
         {
@@ -72,10 +71,6 @@ function SignUpPage() {
                 console.log("wha is thsis\n\n\n\n",formError);
                 console.log(key)
                 return <li key={{index}}>{key}</li>
-                // (
-                // formError[key].map((message, index) => (
-                //   <li key={`${key}_${index}`}>{message}</li>
-                // )))
               })}
             </ul>
                     <div>
